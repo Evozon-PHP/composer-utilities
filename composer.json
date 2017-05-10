@@ -1,0 +1,33 @@
+{
+    "name": "evozon-php/composer-utilities",
+    "description": "Composer utilities",
+    "type": "composer-plugin",
+    "license": "MIT",
+    "homepage": "https://github.com/Evozon-PHP/composer-utilities",
+    "support": {
+        "issues": "https://github.com/Evozon-PHP/composer-utilities/issues",
+        "wiki": "https://github.com/Evozon-PHP/composer-utilities/wiki",
+        "source": "https://github.com/Evozon-PHP/composer-utilities"
+    },
+    "authors": [
+        {
+            "name": "Constantin Bejenaru",
+            "email": "constantin.bejenaru@evozon.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.1",
+        "composer-plugin-api": "^1.1",
+        "symfony/console": "~2.6|~3.0",
+        "symfony/property-access": "^3.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "EvozonPhp\\ComposerUtilities\\": "src/"
+        }
+    },
+    "extra": {
+        "class": "EvozonPhp\\ComposerUtilities\\Plugin\\Sync"
+    }
+}
