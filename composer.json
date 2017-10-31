@@ -1,5 +1,5 @@
 {
-    "name": "evozon-php/composer-utilities",
+    "name": "evozon-php/composer-utilitiess",
     "description": "Composer utilities",
     "type": "composer-plugin",
     "license": "MIT",
@@ -20,7 +20,9 @@
         "php": ">=7.1",
         "composer-plugin-api": "^1.1",
         "symfony/console": "~2.6|~3.0",
-        "symfony/property-access": "^3.2"
+        "symfony/property-access": "^3.2",
+        "symfony/filesystem": "^3.3",
+        "symfony/yaml": "^3.3"
     },
     "autoload": {
         "psr-4": {
@@ -28,6 +30,9 @@
         }
     },
     "extra": {
-        "class": "EvozonPhp\\ComposerUtilities\\Plugin\\Sync"
+        "class": [
+            "EvozonPhp\\ComposerUtilities\\Plugin\\ParametersUpdate",
+            "EvozonPhp\\ComposerUtilities\\Plugin\\Sync"
+        ]
     }
 }

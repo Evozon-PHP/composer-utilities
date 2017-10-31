@@ -4,7 +4,7 @@ namespace EvozonPhp\ComposerUtilities\Command;
 
 use Composer\Command\BaseCommand;
 use Composer\Json\JsonFile;
-use EvozonPhp\ComposerUtilities\Sync\Json;
+use EvozonPhp\ComposerUtilities\Handler\SyncJsonHandler;
 use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -18,22 +18,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  * @copyright Evozon Systems SRL (http://www.evozon.com/)
  * @author    Constantin Bejenaru <constantin.bejenaru@evozon.com>
  */
-class SyncJson extends BaseCommand
+class SyncJsonCommand extends BaseCommand
 {
-    /**
-     * Default target composer file name.
-     *
-     * @var string
-     */
-    const DEFAULT_TARGET_COMPOSER_FILE = 'composer.json';
-
-    /**
-     * Default source composer file name.
-     *
-     * @var string
-     */
-    const DEFAULT_SOURCE_COMPOSER_FILE = 'dev.json';
-
     /**
      * {@inheritdoc}
      */
@@ -50,14 +36,14 @@ class SyncJson extends BaseCommand
                     's',
                     InputOption::VALUE_OPTIONAL,
                     'Path to source composer.json file.',
-                    self::DEFAULT_SOURCE_COMPOSER_FILE
+                    SyncJsonHandler::DEFAULT_SOURCE_COMPOSER_FILE
                 ),
                 new InputOption(
                     'target',
                     't',
                     InputOption::VALUE_OPTIONAL,
                     'Path to target (destination) composer.json file.',
-                    self::DEFAULT_TARGET_COMPOSER_FILE
+                    SyncJsonHandler::DEFAULT_TARGET_COMPOSER_FILE
                 ),
                 new InputOption(
                     'dry-run',
@@ -72,7 +58,7 @@ class SyncJson extends BaseCommand
 The <info>sync:json</info> command reads a source json file and synchronizes it to the destination file.
 Useful in monolith development where you have to maintain <info>dev.json</info> and <info>composer.json</info>.
 
-<info>php composer.phar sync:json -source dev.json -target composer.json</info>
+<info>php composer.phar sync:json --source dev.json --target composer.json</info>
 
 You may define nodes that you want to ignore during sync.
 Please note, nodes are defined in `PropertyAccess` (https://goo.gl/VUiBsU) format.
@@ -105,14 +91,15 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $composer = $this->getComposer();
         $io = $this->getIO();
 
         $source = new JsonFile($input->getOption('source'));
         $target = new JsonFile($input->getOption('target'));
 
-        $sync = new Json($this->getComposer(), $this->getIO());
+        $handler = new SyncJsonHandler($composer, $io);
+        $result = $handler->handle($source, $target);
 
-        $result = $sync->synchronize($source, $target);
         $resultString = JsonFile::encode($result);
 
         if ($input->getOption('dry-run')) {

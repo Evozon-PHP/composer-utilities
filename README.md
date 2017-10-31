@@ -47,5 +47,41 @@ COMPOSER=dev.json composer install
 There is also a custom command added when you want to manually trigger the synchronization process:
 
 ```
-composer sync:json -source dev.json -target composer.json
+composer sync:json --source dev.json --target composer.json
 ```
+
+### Force Update Parameters
+
+Useful when some parameters change in `parameters.yml.dist` but updating them `parameters.yml` is tedious. Usually it's the case with array parameters.
+
+Add the following to your `composer.json` file:
+
+```
+{
+  "config": {
+      "composer-utilities": {
+            "parameters-update": {
+                "file": "app/config/parameters.yml",
+                "dist-file":  "app/config/parameters.yml.dist",
+                "parameters": [
+                    "foo",
+                    "bar"
+                ]
+            }
+      }
+  }
+}
+```
+
+The plugin will hook automatically to the `post-install-cmd` and `post-update-cmd` events and ask if you want to update parameters.
+
+```
+composer install
+// or
+composer update
+```
+
+There is also a custom command added when you want to manually trigger parameters update process:
+
+```
+composer parameters:update --source app/config/parameters.yml.dist --target app/config/parameters.yml

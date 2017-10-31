@@ -1,13 +1,9 @@
 <?php
 
-namespace EvozonPhp\ComposerUtilities\Sync;
+namespace EvozonPhp\ComposerUtilities\Handler;
 
-use Composer\Composer;
-use Composer\IO\IOInterface;
 use Composer\Json\JsonFile;
 use Composer\Repository\PlatformRepository;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
 
 /**
  * Synchronize source to target json files.
@@ -15,8 +11,22 @@ use Symfony\Component\PropertyAccess\PropertyAccessor;
  * @copyright Evozon Systems SRL (http://www.evozon.com/)
  * @author    Constantin Bejenaru <constantin.bejenaru@evozon.com>
  */
-class Json
+class SyncJsonHandler extends AbstractHandler
 {
+    /**
+     * Default target composer file name.
+     *
+     * @var string
+     */
+    const DEFAULT_TARGET_COMPOSER_FILE = 'composer.json';
+
+    /**
+     * Default source composer file name.
+     *
+     * @var string
+     */
+    const DEFAULT_SOURCE_COMPOSER_FILE = 'dev.json';
+
     /**
      * PropertyAccess path for sync ingore nodes.
      *
@@ -39,33 +49,6 @@ class Json
     const PATH_REQUIRE_DEV = '[require-dev]';
 
     /**
-     * @var Composer
-     */
-    protected $composer;
-
-    /**
-     * @var IOInterface
-     */
-    protected $io;
-
-    /**
-     * @var PropertyAccessor
-     */
-    private $accessor;
-
-    /**
-     * Constructor.
-     *
-     * @param Composer    $composer
-     * @param IOInterface $io
-     */
-    public function __construct(Composer $composer, IOInterface $io)
-    {
-        $this->setComposer($composer);
-        $this->setIo($io);
-    }
-
-    /**
      * Synchronize source to target.
      *
      * @param JsonFile $source
@@ -73,7 +56,7 @@ class Json
      *
      * @return array
      */
-    public function synchronize(JsonFile $source, JsonFile $target): array
+    public function handle(JsonFile $source, JsonFile $target): array
     {
         $sourceData = $source->read();
         $targetData = $target->read();
@@ -167,79 +150,5 @@ class Json
     protected function getIgnoreNodes(): array
     {
         return $this->getAccessor()->getValue($this->getConfig(), self::PATH_SYNC_IGNORE_NODES) ?: [];
-    }
-
-    /**
-     * Get utilities configuration.
-     *
-     * @return array
-     */
-    protected function getConfig(): array
-    {
-        return (array) $this->getComposer()->getConfig()->get('composer-utilities');
-    }
-
-    /**
-     * Get Accessor.
-     *
-     * @SuppressWarnings(PHPMD.StaticAccess)
-     *
-     * @return PropertyAccessor
-     */
-    protected function getAccessor(): PropertyAccessor
-    {
-        if (null === $this->accessor) {
-            $this->accessor = PropertyAccess::createPropertyAccessor();
-        }
-
-        return $this->accessor;
-    }
-
-    /**
-     * Get Composer.
-     *
-     * @return Composer
-     */
-    public function getComposer(): Composer
-    {
-        return $this->composer;
-    }
-
-    /**
-     * Set Composer.
-     *
-     * @param Composer $composer
-     *
-     * @return Json
-     */
-    protected function setComposer(Composer $composer): Json
-    {
-        $this->composer = $composer;
-
-        return $this;
-    }
-
-    /**
-     * Get Io.
-     *
-     * @return IOInterface
-     */
-    public function getIo(): IOInterface
-    {
-        return $this->io;
-    }
-
-    /**
-     * Set Io.
-     *
-     * @param IOInterface $io
-     *
-     * @return Json
-     */
-    protected function setIo(IOInterface $io): Json
-    {
-        $this->io = $io;
-
-        return $this;
     }
 }

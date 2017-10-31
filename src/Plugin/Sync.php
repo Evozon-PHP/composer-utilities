@@ -10,7 +10,7 @@ use Composer\Plugin\Capable as CapableInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
-use EvozonPhp\ComposerUtilities\Sync\Json;
+use EvozonPhp\ComposerUtilities\Handler\SyncJsonHandler;
 use InvalidArgumentException;
 
 /**
@@ -53,7 +53,7 @@ class Sync implements PluginInterface, CapableInterface, EventSubscriberInterfac
     public function getCapabilities(): array
     {
         return [
-            'Composer\Plugin\Capability\CommandProvider' => 'EvozonPhp\ComposerUtilities\Plugin\Capability\Sync',
+            'Composer\Plugin\Capability\CommandProvider' => 'EvozonPhp\ComposerUtilities\Plugin\Capability\SyncCapability',
         ];
     }
 
@@ -104,19 +104,9 @@ class Sync implements PluginInterface, CapableInterface, EventSubscriberInterfac
         }
 
         // Ask if we continue
-        $continue = $io->askAndValidate(
+        $continue = $io->askConfirmation(
             sprintf('Do you want to synchronize your <info>%s</info> file? [y/n] ', self::DEFAULT_COMPOSER_FILE),
-            function (string $value): bool {
-                $input = strtolower(substr(trim($value), 0, 1));
-                if ('y' === $input) {
-                    return true;
-                } elseif ('n' === $input) {
-                    return false;
-                }
-                throw new InvalidArgumentException('Please answer (y)es or (n)o');
-            },
-            null,
-            'y'
+            true
         );
 
         if (!$continue) {
@@ -165,8 +155,8 @@ class Sync implements PluginInterface, CapableInterface, EventSubscriberInterfac
         $source = new JsonFile($composerFileSource);
         $target = new JsonFile($composerFileTarget);
 
-        $sync = new Json($composer, $io);
-        $result = $sync->synchronize($source, $target);
+        $sync = new SyncJsonHandler($composer, $io);
+        $result = $sync->handle($source, $target);
 
         try {
             $target->write($result);
