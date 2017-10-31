@@ -1,5 +1,5 @@
 {
-    "name": "evozon-php/composer-utilitiess",
+    "name": "evozon-php/composer-utilities",
     "description": "Composer utilities",
     "type": "composer-plugin",
     "license": "MIT",
