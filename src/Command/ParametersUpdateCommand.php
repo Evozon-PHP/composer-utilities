@@ -7,8 +7,6 @@ use EvozonPhp\ComposerUtilities\Handler\ParametersUpdateHandler;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Filesystem\Exception\IOException;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -94,21 +92,24 @@ EOT
         $source = $input->getOption('source');
         $target = $input->getOption('target');
 
-        try {
-            $handler = new ParametersUpdateHandler($composer, $io);
-            $result = $handler->handle($source, $target);
+        $handler = new ParametersUpdateHandler($composer, $io);
+        $result = $handler->handle($source, $target);
 
-            $resultString = Yaml::dump($result, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+        $resultString = Yaml::dump($result, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
 
-            if ($input->getOption('dry-run')) {
-                $io->write($resultString);
+        if ($input->getOption('dry-run')) {
+            $io->write($resultString);
 
-                return;
-            }
+            return;
+        }
 
-            $filesystem = new Filesystem();
-            $filesystem->dumpFile($target, $resultString);
+        if (!is_dir($dir = dirname($target))) {
+            mkdir($dir, 0755, true);
+        }
 
+        $result = file_put_contents($target, $resultString);
+
+        if ($result) {
             $io->write(
                 sprintf(
                     'Successfully updated parameters from source <info>%s</info> to target <info>%s</info>.',
@@ -116,17 +117,12 @@ EOT
                     $target
                 )
             );
-        } catch (IOException $exception) {
+        } else {
             $io->write(
-                sprintf('An error occurred while trying to write <info>%s</info>.', $exception->getPath())
+                sprintf('An error occurred while trying to write file <info>%s</info>.', $target)
             );
             $io->write('Make sure the target file has correct writing permissions.');
             $io->write('Alternatively try the <info>--dry-run</info> option to dump the full content.');
-
-            $io->write($exception->getMessage());
-        } catch (Exception $exception) {
-            $io->write(sprintf('An error occurred.'));
-            $io->write($exception->getMessage());
         }
     }
 }
